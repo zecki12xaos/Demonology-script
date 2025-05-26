@@ -7,6 +7,12 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+-- Color constants
+local COLOR_GREEN = Color3.fromRGB(0, 255, 0) -- Yes, Room, Temperature
+local COLOR_RED = Color3.fromRGB(255, 0, 0) -- No
+local COLOR_YELLOW = Color3.fromRGB(255, 255, 0) -- Checking..., Searching...
+local COLOR_GRAY = Color3.fromRGB(200, 200, 200) -- Default (Not Found, Error)
+
 -- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GhostTrackerGui"
@@ -32,7 +38,7 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(1, 0, 0, 30)
 titleLabel.Position = UDim2.new(0, 0, 0, 10)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Ghost Tracker by Yatashi"
+titleLabel.Text = "Ghost Tracker"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
 titleLabel.TextSize = 20
 titleLabel.Font = Enum.Font.GothamBold
@@ -44,8 +50,8 @@ local roomLabel = Instance.new("TextLabel")
 roomLabel.Size = UDim2.new(1, 0, 0, 30)
 roomLabel.Position = UDim2.new(0, 0, 0, 50)
 roomLabel.BackgroundTransparency = 1
-roomLabel.Text = "Favorite Room: Searching..."
-roomLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Light gray text
+roomLabel.Text = "Favorite Room: Checking..."
+roomLabel.TextColor3 = COLOR_YELLOW -- Initial yellow
 roomLabel.TextSize = 16
 roomLabel.Font = Enum.Font.Gotham
 roomLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -56,8 +62,8 @@ local tempLabel = Instance.new("TextLabel")
 tempLabel.Size = UDim2.new(1, 0, 0, 30)
 tempLabel.Position = UDim2.new(0, 0, 0, 80)
 tempLabel.BackgroundTransparency = 1
-tempLabel.Text = "Favorite Temp: Searching..."
-tempLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+tempLabel.Text = "Favorite Temp: Checking..."
+tempLabel.TextColor3 = COLOR_YELLOW -- Initial yellow
 tempLabel.TextSize = 16
 tempLabel.Font = Enum.Font.Gotham
 tempLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -69,7 +75,7 @@ emfLabel.Size = UDim2.new(1, 0, 0, 30)
 emfLabel.Position = UDim2.new(0, 0, 0, 110)
 emfLabel.BackgroundTransparency = 1
 emfLabel.Text = "EMF 5: Checking..."
-emfLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+emfLabel.TextColor3 = COLOR_YELLOW -- Initial yellow
 emfLabel.TextSize = 16
 emfLabel.Font = Enum.Font.Gotham
 emfLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -81,7 +87,7 @@ orbLabel.Size = UDim2.new(1, 0, 0, 30)
 orbLabel.Position = UDim2.new(0, 0, 0, 140)
 orbLabel.BackgroundTransparency = 1
 orbLabel.Text = "Ghost Orb: Checking..."
-orbLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+orbLabel.TextColor3 = COLOR_YELLOW -- Initial yellow
 orbLabel.TextSize = 16
 orbLabel.Font = Enum.Font.Gotham
 orbLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -93,7 +99,7 @@ handprintsLabel.Size = UDim2.new(1, 0, 0, 30)
 handprintsLabel.Position = UDim2.new(0, 0, 0, 170)
 handprintsLabel.BackgroundTransparency = 1
 handprintsLabel.Text = "Handprints: Checking..."
-handprintsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+handprintsLabel.TextColor3 = COLOR_YELLOW -- Initial yellow
 handprintsLabel.TextSize = 16
 handprintsLabel.Font = Enum.Font.Gotham
 handprintsLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -105,7 +111,7 @@ activityLabel.Size = UDim2.new(1, 0, 0, 30)
 activityLabel.Position = UDim2.new(0, 0, 0, 200)
 activityLabel.BackgroundTransparency = 1
 activityLabel.Text = "Activity: Checking..."
-activityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+activityLabel.TextColor3 = COLOR_YELLOW -- Initial yellow
 activityLabel.TextSize = 16
 activityLabel.Font = Enum.Font.Gotham
 activityLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -118,7 +124,7 @@ fullbrightButton.Position = UDim2.new(0.1, 0, 0, 230) -- Below labels
 fullbrightButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark gray button
 fullbrightButton.BorderSizePixel = 0
 fullbrightButton.Text = "Enable Fullbright"
-fullbrightButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+fullbrightButton.TextColor3 = COLOR_GRAY
 fullbrightButton.TextSize = 14
 fullbrightButton.Font = Enum.Font.Gotham
 fullbrightButton.Parent = frame
@@ -219,7 +225,9 @@ local ghostModel = Workspace:WaitForChild("Ghost", 10)
 if not ghostModel then
     warn("Ghost model not found after 10 seconds.")
     roomLabel.Text = "Favorite Room: Not Found"
+    roomLabel.TextColor3 = COLOR_GRAY
     tempLabel.Text = "Favorite Temp: Not Found"
+    tempLabel.TextColor3 = COLOR_GRAY
 else
     local ghostPart = ghostModel:FindFirstChildWhichIsA("BasePart")
     local roomsFolder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Rooms")
@@ -227,11 +235,15 @@ else
     if not ghostPart then
         warn("Ghost part (BasePart) not found in Ghost model.")
         roomLabel.Text = "Favorite Room: Error"
+        roomLabel.TextColor3 = COLOR_GRAY
         tempLabel.Text = "Favorite Temp: Error"
+        tempLabel.TextColor3 = COLOR_GRAY
     elseif not roomsFolder then
         warn("Map/Rooms folder not found in Workspace.")
         roomLabel.Text = "Favorite Room: Error"
+        roomLabel.TextColor3 = COLOR_GRAY
         tempLabel.Text = "Favorite Temp: Error"
+        tempLabel.TextColor3 = COLOR_GRAY
     else
         local roomVisitCounts = {}
         local stableRoom, roomStreak = nil, 0
@@ -279,26 +291,37 @@ else
                             local favRoomInstance = roomsFolder:FindFirstChild(favoriteRoom)
                             if favRoomInstance then
                                 roomLabel.Text = "Favorite Room: " .. favoriteRoom
+                                roomLabel.TextColor3 = COLOR_GREEN
                                 if favRoomInstance:GetAttribute("Temperature") then
                                     tempLabel.Text = string.format("Favorite Temp: %.1f°C", favRoomInstance:GetAttribute("Temperature"))
+                                    tempLabel.TextColor3 = COLOR_GREEN
                                 else
                                     tempLabel.Text = "Favorite Temp: Not Available"
+                                    tempLabel.TextColor3 = COLOR_GRAY
                                 end
                             else
                                 roomLabel.Text = "Favorite Room: Unknown"
+                                roomLabel.TextColor3 = COLOR_GRAY
                                 tempLabel.Text = "Favorite Temp: Unknown"
+                                tempLabel.TextColor3 = COLOR_GRAY
                             end
                         else
                             roomLabel.Text = "Favorite Room: Checking..."
+                            roomLabel.TextColor3 = COLOR_YELLOW
                             tempLabel.Text = "Favorite Temp: Checking..."
+                            tempLabel.TextColor3 = COLOR_YELLOW
                         end
                     else
                         roomLabel.Text = "Favorite Room: In Base Camp"
+                        roomLabel.TextColor3 = COLOR_GRAY
                         tempLabel.Text = "Favorite Temp: N/A"
+                        tempLabel.TextColor3 = COLOR_GRAY
                     end
                 else
                     roomLabel.Text = "Favorite Room: Checking..."
+                    roomLabel.TextColor3 = COLOR_YELLOW
                     tempLabel.Text = "Favorite Temp: Checking..."
+                    tempLabel.TextColor3 = COLOR_YELLOW
                 end
             end
         end)()
@@ -318,6 +341,7 @@ coroutine.wrap(function()
                         local part5 = indicators:FindFirstChild("5")
                         if part5 and part5:IsA("BasePart") and part5.Material == Enum.Material.Neon then
                             emfLabel.Text = "EMF 5: Yes"
+                            emfLabel.TextColor3 = COLOR_GREEN
                             foundNeon = true
                             break
                         end
@@ -326,6 +350,7 @@ coroutine.wrap(function()
             end
         else
             emfLabel.Text = "EMF 5: Items Not Found"
+            emfLabel.TextColor3 = COLOR_GRAY
             warn("Items folder not found in Workspace!")
             break
         end
@@ -342,9 +367,11 @@ coroutine.wrap(function()
         local ghostOrb = Workspace:FindFirstChild("GhostOrb")
         if ghostOrb and ghostOrb:IsA("BasePart") then
             orbLabel.Text = "Ghost Orb: Yes"
+            orbLabel.TextColor3 = COLOR_GREEN
             foundGhostOrb = true
         else
             orbLabel.Text = "Ghost Orb: No"
+            orbLabel.TextColor3 = COLOR_RED
         end
         task.wait(1)
     end
@@ -356,14 +383,17 @@ coroutine.wrap(function()
     if not handprintsFolder then
         warn("Handprints folder not found in Workspace!")
         handprintsLabel.Text = "Handprints: Not Found"
+        handprintsLabel.TextColor3 = COLOR_GRAY
     else
         local foundHandprints = false
         while not foundHandprints do
             if #handprintsFolder:GetChildren() > 0 then
                 handprintsLabel.Text = "Handprints: Yes"
+                handprintsLabel.TextColor3 = COLOR_GREEN
                 foundHandprints = true
             else
-                handprintsLabel.Text = "Handprints: Searching..."
+                handprintsLabel.Text = "Handprints: Checking..."
+                handprintsLabel.TextColor3 = COLOR_RED
             end
             task.wait(1)
         end
@@ -391,6 +421,7 @@ coroutine.wrap(function()
                 for _, part in ipairs(visibleParts:GetChildren()) do
                     if part:IsA("BasePart") and math.abs(part.Transparency - 0.9) < 0.0001 then
                         activityLabel.Text = "Laser: Laser or Event"
+                        activityLabel.TextColor3 = COLOR_GREEN
                         lastPrintTime = os.clock()
                         foundActivity = true
                         return
@@ -399,6 +430,7 @@ coroutine.wrap(function()
             end
         end
         activityLabel.Text = "Laser: Checking..."
+        activityLabel.TextColor3 = COLOR_YELLOW
     end
 
     RunService.Heartbeat:Connect(checkVisibleParts)
