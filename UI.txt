@@ -1,0 +1,405 @@
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GhostTrackerGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+-- Create main Frame with black background
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 280) -- Height for labels + button
+frame.Position = UDim2.new(0.5, -150, 0.1, 0) -- Centered near the top
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(50, 50, 50) -- Subtle gray border
+frame.Parent = screenGui
+
+-- Add rounded corners
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = frame
+
+-- Title label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0, 10)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Ghost Tracker by Yatashi"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+titleLabel.TextSize = 20
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.Parent = frame
+
+-- Favorite room label
+local roomLabel = Instance.new("TextLabel")
+roomLabel.Size = UDim2.new(1, 0, 0, 30)
+roomLabel.Position = UDim2.new(0, 0, 0, 50)
+roomLabel.BackgroundTransparency = 1
+roomLabel.Text = "Favorite Room: Searching..."
+roomLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Light gray text
+roomLabel.TextSize = 16
+roomLabel.Font = Enum.Font.Gotham
+roomLabel.TextXAlignment = Enum.TextXAlignment.Center
+roomLabel.Parent = frame
+
+-- Temperature label
+local tempLabel = Instance.new("TextLabel")
+tempLabel.Size = UDim2.new(1, 0, 0, 30)
+tempLabel.Position = UDim2.new(0, 0, 0, 80)
+tempLabel.BackgroundTransparency = 1
+tempLabel.Text = "Favorite Temp: Searching..."
+tempLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+tempLabel.TextSize = 16
+tempLabel.Font = Enum.Font.Gotham
+tempLabel.TextXAlignment = Enum.TextXAlignment.Center
+tempLabel.Parent = frame
+
+-- EMF 5 label
+local emfLabel = Instance.new("TextLabel")
+emfLabel.Size = UDim2.new(1, 0, 0, 30)
+emfLabel.Position = UDim2.new(0, 0, 0, 110)
+emfLabel.BackgroundTransparency = 1
+emfLabel.Text = "EMF 5: Checking..."
+emfLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+emfLabel.TextSize = 16
+emfLabel.Font = Enum.Font.Gotham
+emfLabel.TextXAlignment = Enum.TextXAlignment.Center
+emfLabel.Parent = frame
+
+-- Ghost Orb label
+local orbLabel = Instance.new("TextLabel")
+orbLabel.Size = UDim2.new(1, 0, 0, 30)
+orbLabel.Position = UDim2.new(0, 0, 0, 140)
+orbLabel.BackgroundTransparency = 1
+orbLabel.Text = "Ghost Orb: Checking..."
+orbLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+orbLabel.TextSize = 16
+orbLabel.Font = Enum.Font.Gotham
+orbLabel.TextXAlignment = Enum.TextXAlignment.Center
+orbLabel.Parent = frame
+
+-- Handprints label
+local handprintsLabel = Instance.new("TextLabel")
+handprintsLabel.Size = UDim2.new(1, 0, 0, 30)
+handprintsLabel.Position = UDim2.new(0, 0, 0, 170)
+handprintsLabel.BackgroundTransparency = 1
+handprintsLabel.Text = "Handprints: Checking..."
+handprintsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+handprintsLabel.TextSize = 16
+handprintsLabel.Font = Enum.Font.Gotham
+handprintsLabel.TextXAlignment = Enum.TextXAlignment.Center
+handprintsLabel.Parent = frame
+
+-- Activity label
+local activityLabel = Instance.new("TextLabel")
+activityLabel.Size = UDim2.new(1, 0, 0, 30)
+activityLabel.Position = UDim2.new(0, 0, 0, 200)
+activityLabel.BackgroundTransparency = 1
+activityLabel.Text = "Activity: Checking..."
+activityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+activityLabel.TextSize = 16
+activityLabel.Font = Enum.Font.Gotham
+activityLabel.TextXAlignment = Enum.TextXAlignment.Center
+activityLabel.Parent = frame
+
+-- Fullbright toggle button
+local fullbrightButton = Instance.new("TextButton")
+fullbrightButton.Size = UDim2.new(0.8, 0, 0, 30)
+fullbrightButton.Position = UDim2.new(0.1, 0, 0, 230) -- Below labels
+fullbrightButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark gray button
+fullbrightButton.BorderSizePixel = 0
+fullbrightButton.Text = "Enable Fullbright"
+fullbrightButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+fullbrightButton.TextSize = 14
+fullbrightButton.Font = Enum.Font.Gotham
+fullbrightButton.Parent = frame
+
+-- Add rounded corners to button
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 5)
+buttonCorner.Parent = fullbrightButton
+
+-- Drag functionality
+local isDragging = false
+local dragStart = nil
+local startPos = nil
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        local newPos = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+
+        -- Get screen size
+        local screenSize = frame.Parent.AbsoluteSize
+        local frameSize = frame.AbsoluteSize
+
+        -- Clamp position to keep frame within screen bounds
+        newPos = UDim2.new(
+            0,
+            math.clamp(newPos.X.Offset, 0, screenSize.X - frameSize.X),
+            0,
+            math.clamp(newPos.Y.Offset, 0, screenSize.Y - frameSize.Y)
+        )
+
+        frame.Position = newPos
+    end
+end)
+
+-- Fullbright logic
+local isFullbright = false
+local defaultLighting = {
+    Brightness = Lighting.Brightness,
+    GlobalShadows = Lighting.GlobalShadows,
+    Ambient = Lighting.Ambient
+}
+
+local function toggleFullbright()
+    isFullbright = not isFullbright
+    if isFullbright then
+        Lighting.Brightness = 2
+        Lighting.GlobalShadows = false
+        Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+        fullbrightButton.Text = "Disable Fullbright"
+    else
+        Lighting.Brightness = defaultLighting.Brightness
+        Lighting.GlobalShadows = defaultLighting.GlobalShadows
+        Lighting.Ambient = defaultLighting.Ambient
+        fullbrightButton.Text = "Enable Fullbright"
+    end
+end
+
+fullbrightButton.MouseButton1Click:Connect(toggleFullbright)
+
+-- Load external script
+coroutine.wrap(function()
+    local success, result = pcall(function()
+        local scriptContent = game:HttpGet("https://raw.githubusercontent.com/RelkzzRebranded/THEGHOSTISAMOLESTER/refs/heads/main/script.lua")
+        local func = loadstring(scriptContent)
+        if func then
+            func()
+        else
+            warn("Failed to load external script: Invalid Lua code")
+        end
+    end)
+    if not success then
+        warn("Error loading external script: " .. tostring(result))
+    end
+end)()
+
+-- Ghost tracking logic (Favorite Room and Temperature)
+local ghostModel = Workspace:WaitForChild("Ghost", 10)
+if not ghostModel then
+    warn("Ghost model not found after 10 seconds.")
+    roomLabel.Text = "Favorite Room: Not Found"
+    tempLabel.Text = "Favorite Temp: Not Found"
+else
+    local ghostPart = ghostModel:FindFirstChildWhichIsA("BasePart")
+    local roomsFolder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Rooms")
+
+    if not ghostPart then
+        warn("Ghost part (BasePart) not found in Ghost model.")
+        roomLabel.Text = "Favorite Room: Error"
+        tempLabel.Text = "Favorite Temp: Error"
+    elseif not roomsFolder then
+        warn("Map/Rooms folder not found in Workspace.")
+        roomLabel.Text = "Favorite Room: Error"
+        tempLabel.Text = "Favorite Temp: Error"
+    else
+        local roomVisitCounts = {}
+        local stableRoom, roomStreak = nil, 0
+
+        local function isPointInRegion(part, pos)
+            local rel = part.CFrame:PointToObjectSpace(pos)
+            return math.abs(rel.X) <= part.Size.X / 2 and math.abs(rel.Y) <= part.Size.Y / 2 and math.abs(rel.Z) <= part.Size.Z / 2
+        end
+
+        local function getRoomName(pos)
+            for _, room in ipairs(roomsFolder:GetChildren()) do
+                for _, part in ipairs(room:GetDescendants()) do
+                    if part:IsA("BasePart") and isPointInRegion(part, pos) then
+                        return room.Name, room
+                    end
+                end
+            end
+            return nil
+        end
+
+        coroutine.wrap(function()
+            while task.wait(1.5) do
+                local currentRoomName, roomInstance = getRoomName(ghostPart.Position)
+
+                if currentRoomName == stableRoom then
+                    roomStreak += 1
+                else
+                    stableRoom = currentRoomName
+                    roomStreak = 1
+                end
+
+                if roomStreak >= 2 and currentRoomName then
+                    if currentRoomName ~= "Base Camp" then
+                        roomVisitCounts[currentRoomName] = (roomVisitCounts[currentRoomName] or 0) + 1
+
+                        local favoriteRoom, maxVisits = nil, 0
+                        for name, count in pairs(roomVisitCounts) do
+                            if count > maxVisits then
+                                favoriteRoom = name
+                                maxVisits = count
+                            end
+                        end
+
+                        if favoriteRoom then
+                            local favRoomInstance = roomsFolder:FindFirstChild(favoriteRoom)
+                            if favRoomInstance then
+                                roomLabel.Text = "Favorite Room: " .. favoriteRoom
+                                if favRoomInstance:GetAttribute("Temperature") then
+                                    tempLabel.Text = string.format("Favorite Temp: %.1f°C", favRoomInstance:GetAttribute("Temperature"))
+                                else
+                                    tempLabel.Text = "Favorite Temp: Not Available"
+                                end
+                            else
+                                roomLabel.Text = "Favorite Room: Unknown"
+                                tempLabel.Text = "Favorite Temp: Unknown"
+                            end
+                        else
+                            roomLabel.Text = "Favorite Room: Checking..."
+                            tempLabel.Text = "Favorite Temp: Checking..."
+                        end
+                    else
+                        roomLabel.Text = "Favorite Room: In Base Camp"
+                        tempLabel.Text = "Favorite Temp: N/A"
+                    end
+                else
+                    roomLabel.Text = "Favorite Room: Checking..."
+                    tempLabel.Text = "Favorite Temp: Checking..."
+                end
+            end
+        end)()
+    end
+end
+
+-- EMF 5 (Neon) tracking
+coroutine.wrap(function()
+    local foundNeon = false
+    while not foundNeon do
+        local itemsFolder = Workspace:FindFirstChild("Items")
+        if itemsFolder then
+            for _, model in pairs(itemsFolder:GetChildren()) do
+                if model:IsA("Model") then
+                    local indicators = model:FindFirstChild("Indicators")
+                    if indicators then
+                        local part5 = indicators:FindFirstChild("5")
+                        if part5 and part5:IsA("BasePart") and part5.Material == Enum.Material.Neon then
+                            emfLabel.Text = "EMF 5: Yes"
+                            foundNeon = true
+                            break
+                        end
+                    end
+                end
+            end
+        else
+            emfLabel.Text = "EMF 5: Items Not Found"
+            warn("Items folder not found in Workspace!")
+            break
+        end
+        if not foundNeon then
+            task.wait(1)
+        end
+    end
+end)()
+
+-- Ghost Orb tracking
+coroutine.wrap(function()
+    local foundGhostOrb = false
+    while not foundGhostOrb do
+        local ghostOrb = Workspace:FindFirstChild("GhostOrb")
+        if ghostOrb and ghostOrb:IsA("BasePart") then
+            orbLabel.Text = "Ghost Orb: Yes"
+            foundGhostOrb = true
+        else
+            orbLabel.Text = "Ghost Orb: No"
+        end
+        task.wait(1)
+    end
+end)()
+
+-- Handprints tracking
+coroutine.wrap(function()
+    local handprintsFolder = Workspace:FindFirstChild("Handprints")
+    if not handprintsFolder then
+        warn("Handprints folder not found in Workspace!")
+        handprintsLabel.Text = "Handprints: Not Found"
+    else
+        local foundHandprints = false
+        while not foundHandprints do
+            if #handprintsFolder:GetChildren() > 0 then
+                handprintsLabel.Text = "Handprints: Yes"
+                foundHandprints = true
+            else
+                handprintsLabel.Text = "Handprints: Searching..."
+            end
+            task.wait(1)
+        end
+    end
+end)()
+
+-- Activity (Laser or Event) tracking
+coroutine.wrap(function()
+    local lastPrintTime = 0
+    local COOLDOWN = 15 -- Cooldown in seconds
+    local foundActivity = false
+
+    local function checkVisibleParts()
+        if foundActivity then
+            return -- Stop checking if activity was found
+        end
+        if os.clock() - lastPrintTime < COOLDOWN then
+            return -- Skip if cooldown hasn't expired
+        end
+
+        local ghost = Workspace:FindFirstChild("Ghost")
+        if ghost then
+            local visibleParts = ghost:FindFirstChild("VisibleParts")
+            if visibleParts then
+                for _, part in ipairs(visibleParts:GetChildren()) do
+                    if part:IsA("BasePart") and math.abs(part.Transparency - 0.9) < 0.0001 then
+                        activityLabel.Text = "Laser: Laser or Event"
+                        lastPrintTime = os.clock()
+                        foundActivity = true
+                        return
+                    end
+                end
+            end
+        end
+        activityLabel.Text = "Laser: Checking..."
+    end
+
+    RunService.Heartbeat:Connect(checkVisibleParts)
+end)()
