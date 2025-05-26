@@ -393,7 +393,7 @@ coroutine.wrap(function()
                 foundHandprints = true
             else
                 handprintsLabel.Text = "Handprints: Checking..."
-                handprintsLabel.TextColor3 = COLOR_YELLOW
+                handprintsLabel.TextColor3 = COLOR_GREEN
             end
             task.wait(1)
         end
