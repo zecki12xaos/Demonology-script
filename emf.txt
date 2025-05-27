@@ -5,127 +5,46 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Color constants
 local COLOR_GREEN = Color3.fromRGB(0, 255, 0)
-local COLOR_YELLOW = Color3.fromRGB(255, 255, 0)
 local COLOR_GRAY = Color3.fromRGB(200, 200, 200)
 
--- Find labels
+-- Find EMF label
 local screenGui = PlayerGui:WaitForChild("GhostTrackerGui", 10)
 local frame = screenGui and screenGui:FindFirstChild("Frame")
-local roomLabel = frame and frame:GetAttribute("RoomLabel")
-local tempLabel = frame and frame:GetAttribute("TempLabel")
+local emfLabel = frame and frame:GetAttribute("EmfLabel")
 
-if not roomLabel or not tempLabel then
-    warn("Room or Temp label not found!")
+if not emfLabel then
+    warn("EMF label not found!")
     return
 end
 
--- Ghost tracking logic
-local ghostModel = Workspace:WaitForChild("Ghost", 10)
-if not ghostModel then
-    warn("Ghost model not found after 10 seconds.")
-    roomLabel.Text = "Favorite Room: Not Found"
-    roomLabel.TextColor3 = COLOR_GRAY
-    tempLabel.Text = "Favorite Temp: Not Found"
-    tempLabel.TextColor3 = COLOR_GRAY
-    return
-end
-
-local ghostPart = ghostModel:FindFirstChildWhichIsA("BasePart")
-local roomsFolder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Rooms")
-
-if not ghostPart then
-    warn("Ghost part (BasePart) not found in Ghost model.")
-    roomLabel.Text = "Favorite Room: Error"
-    roomLabel.TextColor3 = COLOR_GRAY
-    tempLabel.Text = "Favorite Temp: Error"
-    tempLabel.TextColor3 = COLOR_GRAY
-    return
-elseif not roomsFolder then
-    warn("Map/Rooms folder not found in Workspace.")
-    roomLabel.Text = "Favorite Room: Error"
-    roomLabel.TextColor3 = COLOR_GRAY
-    tempLabel.Text = "Favorite Temp: Error"
-    tempLabel.TextColor3 = COLOR_GRAY
-    return
-end
-
-local roomVisitCounts = {}
-local stableRoom, roomStreak = nil, 0
-
-local function isPointInRegion(part, pos)
-    local rel = part.CFrame:PointToObjectSpace(pos)
-    return math.abs(rel.X) <= part.Size.X / 2 and math.abs(rel.Y) <= part.Size.Y / 2 and math.abs(rel.Z) <= part.Size.Z / 2
-end
-
-local function getRoomName(pos)
-    for _, room in ipairs(roomsFolder:GetChildren()) do
-        for _, part in ipairs(room:GetDescendants()) do
-            if part:IsA("BasePart") and isPointInRegion(part, pos) then
-                return room.Name, room
-            end
-        end
-    end
-    return nil
-end
-
+-- EMF 5 tracking
 coroutine.wrap(function()
-    while task.wait(1.5) do
-        local currentRoomName, roomInstance = getRoomName(ghostPart.Position)
-
-        if currentRoomName == stableRoom then
-            roomStreak += 1
-        else
-            stableRoom = currentRoomName
-            roomStreak = 1
-        end
-
-        if roomStreak >= 2 and currentRoomName then
-            if currentRoomName ~= "Base Camp" then
-                roomVisitCounts[currentRoomName] = (roomVisitCounts[currentRoomName] or 0) + 1
-
-                local favoriteRoom, maxVisits = nil, 0
-                for name, count in pairs(roomVisitCounts) do
-                    if count > maxVisits then
-                        favoriteRoom = name
-                        maxVisits = count
-                    end
-                end
-
-                if favoriteRoom then
-                    local favRoomInstance = roomsFolder:FindFirstChild(favoriteRoom)
-                    if favRoomInstance then
-                        roomLabel.Text = "Favorite Room: " .. favoriteRoom
-                        roomLabel.TextColor3 = COLOR_GREEN
-                        if favRoomInstance:GetAttribute("Temperature") then
-                            tempLabel.Text = string.format("Favorite Temp: %.1f°C", favRoomInstance:GetAttribute("Temperature"))
-                            tempLabel.TextColor3 = COLOR_GREEN
-                        else
-                            tempLabel.Text = "Favorite Temp: Not Available"
-                            tempLabel.TextColor3 = COLOR_GRAY
+    local foundNeon = false
+    while not foundNeon do
+        local itemsFolder = Workspace:FindFirstChild("Items")
+        if itemsFolder then
+            for _, model in pairs(itemsFolder:GetChildren()) do
+                if model:IsA("Model") then
+                    local indicators = model:FindFirstChild("Indicators")
+                    if indicators then
+                        local part5 = indicators:FindFirstChild("5")
+                        if part5 and part5:IsA("BasePart") and part5.Material == Enum.Material.Neon then
+                            emfLabel.Text = "EMF 5: Yes"
+                            emfLabel.TextColor3 = COLOR_GREEN
+                            foundNeon = true
+                            break
                         end
-                    else
-                        roomLabel.Text = "Favorite Room: Unknown"
-                        roomLabel.TextColor3 = COLOR_GRAY
-                        tempLabel.Text = "Favorite Temp: Unknown"
-                        tempLabel.TextColor3 = COLOR_GRAY
                     end
-                else
-                    roomLabel.Text = "Favorite Room: Checking..."
-                    roomLabel.TextColor3 = COLOR_YELLOW
-                    tempLabel.Text = "Favorite Temp: Checking..."
-                    tempLabel.TextColor3 = COLOR_YELLOW
                 end
-            else
-                roomLabel.Text = "Favorite Room: In Base Camp"
-                roomLabel.TextColor3 = COLOR_GRAY
-                tempLabel.Text = "Favorite Temp: N/A"
-                tempLabel.TextColor3 = COLOR_GRAY
             end
         else
-            roomLabel.Text = "Favorite Room: Checking..."
-            roomLabel.TextColor3 = COLOR_YELLOW
-            tempLabel.Text = "Favorite Temp: Checking..."
-            tempLabel.TextColor3 = COLOR_YELLOW
+            emfLabel.Text = "EMF 5: Items Not Found"
+            emfLabel.TextColor3 = COLOR_GRAY
+            warn("Items folder not found in Workspace!")
+            break
+        end
+        if not foundNeon then
+            task.wait(1)
         end
     end
 end)()
