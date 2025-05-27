@@ -1,0 +1,121 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Color constants
+local COLOR_GREEN = Color3.fromRGB(0, 255, 0)
+local COLOR_RED = Color3.fromRGB(255, 0, 0)
+local COLOR_YELLOW = Color3.fromRGB(255, 255, 0)
+local COLOR_GRAY = Color3.fromRGB(200, 200, 200)
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GhostTrackerGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+-- Create main Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 280)
+frame.Position = UDim2.new(0.5, -150, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(50, 50, 50)
+frame.Parent = screenGui
+
+-- Add rounded corners
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = frame
+
+-- Title label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0, 10)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Ghost Tracker by Yatashi"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 20
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.Parent = frame
+
+-- Favorite room label
+local roomLabel = Instance.new("TextLabel")
+roomLabel.Size = UDim2.new(1, 0, 0, 30)
+roomLabel.Position = UDim2.new(0, 0, 0, 50)
+roomLabel.BackgroundTransparency = 1
+roomLabel.Text = "Favorite Room: Checking..."
+roomLabel.TextColor3 = COLOR_YELLOW
+roomLabel.TextSize = 16
+roomLabel.Font = Enum.Font.Gotham
+roomLabel.TextXAlignment = Enum.TextXAlignment.Center
+roomLabel.Parent = frame
+
+-- Temperature label
+local tempLabel = Instance.new("TextLabel")
+tempLabel.Size = UDim2.new(1, 0, 0, 30)
+tempLabel.Position = UDim2.new(0, 0, 0, 80)
+tempLabel.BackgroundTransparency = 1
+tempLabel.Text = "Favorite Temp: Checking..."
+tempLabel.TextColor3 = COLOR_YELLOW
+tempLabel.TextSize = 16
+tempLabel.Font = Enum.Font.Gotham
+tempLabel.TextXAlignment = Enum.TextXAlignment.Center
+tempLabel.Parent = frame
+
+-- EMF 5 label
+local emfLabel = Instance.new("TextLabel")
+emfLabel.Size = UDim2.new(1, 0, 0, 30)
+emfLabel.Position = UDim2.new(0, 0, 0, 110)
+emfLabel.BackgroundTransparency = 1
+emfLabel.Text = "EMF 5: Checking..."
+emfLabel.TextColor3 = COLOR_YELLOW
+emfLabel.TextSize = 16
+emfLabel.Font = Enum.Font.Gotham
+emfLabel.TextXAlignment = Enum.TextXAlignment.Center
+emfLabel.Parent = frame
+
+-- Ghost Orb label
+local orbLabel = Instance.new("TextLabel")
+orbLabel.Size = UDim2.new(1, 0, 0, 30)
+orbLabel.Position = UDim2.new(0, 0, 0, 140)
+orbLabel.BackgroundTransparency = 1
+orbLabel.Text = "Ghost Orb: Checking..."
+orbLabel.TextColor3 = COLOR_YELLOW
+orbLabel.TextSize = 16
+orbLabel.Font = Enum.Font.Gotham
+orbLabel.TextXAlignment = Enum.TextXAlignment.Center
+orbLabel.Parent = frame
+
+-- Handprints label
+local handprintsLabel = Instance.new("TextLabel")
+handprintsLabel.Size = UDim2.new(1, 0, 0, 30)
+handprintsLabel.Position = UDim2.new(0, 0, 0, 170)
+handprintsLabel.BackgroundTransparency = 1
+handprintsLabel.Text = "Handprints: Checking..."
+handprintsLabel.TextColor3 = COLOR_YELLOW
+handprintsLabel.TextSize = 16
+handprintsLabel.Font = Enum.Font.Gotham
+handprintsLabel.TextXAlignment = Enum.TextXAlignment.Center
+handprintsLabel.Parent = frame
+
+-- Activity label
+local activityLabel = Instance.new("TextLabel")
+activityLabel.Size = UDim2.new(1, 0, 0, 30)
+activityLabel.Position = UDim2.new(0, 0, 0, 200)
+activityLabel.BackgroundTransparency = 1
+activityLabel.Text = "Activity: Checking..."
+activityLabel.TextColor3 = COLOR_YELLOW
+activityLabel.TextSize = 16
+activityLabel.Font = Enum.Font.Gotham
+activityLabel.TextXAlignment = Enum.TextXAlignment.Center
+activityLabel.Parent = frame
+
+-- Store labels in frame for other scripts to access
+frame:SetAttribute("RoomLabel", roomLabel)
+frame:SetAttribute("TempLabel", tempLabel)
+frame:SetAttribute("EmfLabel", emfLabel)
+frame:SetAttribute("OrbLabel", orbLabel)
+frame:SetAttribute("HandprintsLabel", handprintsLabel)
+frame:SetAttribute("ActivityLabel", activityLabel)
