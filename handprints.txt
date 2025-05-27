@@ -1,0 +1,43 @@
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Color constants
+local COLOR_GREEN = Color3.fromRGB(0, 255, 0)
+local COLOR_YELLOW = Color3.fromRGB(255, 255, 0)
+local COLOR_GRAY = Color3.fromRGB(200, 200, 200)
+
+-- Find Handprints label
+local screenGui = PlayerGui:WaitForChild("GhostTrackerGui", 10)
+local frame = screenGui and screenGui:FindFirstChild("Frame")
+local handprintsLabel = frame and frame:GetAttribute("HandprintsLabel")
+
+if not handprintsLabel then
+    warn("Handprints label not found!")
+    return
+end
+
+-- Handprints tracking
+coroutine.wrap(function()
+    local handprintsFolder = Workspace:FindFirstChild("Handprints")
+    if not handprintsFolder then
+        warn("Handprints folder not found in Workspace!")
+        handprintsLabel.Text = "Handprints: Not Found"
+        handprintsLabel.TextColor3 = COLOR_GRAY
+        return
+    end
+
+    local foundHandprints = false
+    while not foundHandprints do
+        if #handprintsFolder:GetChildren() > 0 then
+            handprintsLabel.Text = "Handprints: Yes"
+            handprintsLabel.TextColor3 = COLOR_GREEN
+            foundHandprints = true
+        else
+            handprintsLabel.Text = "Handprints: Checking..."
+            handprintsLabel.TextColor3 = COLOR_YELLOW
+        end
+        task.wait(1)
+    end
+end)()
