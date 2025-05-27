@@ -205,7 +205,7 @@ submitButton.MouseButton1Click:Connect(function()
 	if keyBox.Text == correctKey then
 		closeUI()
 		wait(0.8)
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/zecki12xaos/Demonology-script/refs/heads/main/UI.txt"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/zecki12xaos/Demonology-script/refs/heads/main/Demonology%20by%20Kaya.lua"))()
 	else
 		keyBox.Text = ""
 		keyBox.PlaceholderText = "Invalid key!"
