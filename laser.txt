@@ -1,0 +1,55 @@
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Color constants
+local COLOR_GREEN = Color3.fromRGB(0, 255, 0)
+local COLOR_YELLOW = Color3.fromRGB(255, 255, 0)
+
+-- Find Activity label
+local screenGui = PlayerGui:WaitForChild("GhostTrackerGui", 10)
+local frame = screenGui and screenGui:FindFirstChild("Frame")
+local activityLabel = frame and frame:GetAttribute("ActivityLabel")
+
+if not activityLabel then
+    warn("Activity label not found!")
+    return
+end
+
+-- Activity tracking
+coroutine.wrap(function()
+    local lastPrintTime = 0
+    local COOLDOWN = 15
+    local foundActivity = false
+
+    local function checkVisibleParts()
+        if foundActivity then
+            return
+        end
+        if os.clock() - lastPrintTime < COOLDOWN then
+            return
+        end
+
+        local ghost = Workspace:FindFirstChild("Ghost")
+        if ghost then
+            local visibleParts = ghost:FindFirstChild("VisibleParts")
+            if visibleParts then
+                for _, part in ipairs(visibleParts:GetChildren()) do
+                    if part:IsA("BasePart") and math.abs(part.Transparency - 0.9) < 0.0001 then
+                        activityLabel.Text = "Laser: Laser or Event"
+                        activityLabel.TextColor3 = COLOR_GREEN
+                        lastPrintTime = os.clock()
+                        foundActivity = true
+                        return
+                    end
+                end
+            end
+        end
+        activityLabel.Text = "Laser: Checking..."
+        activityLabel.TextColor3 = COLOR_YELLOW
+    end
+
+    RunService.Heartbeat:Connect(checkVisibleParts)
+end)()
