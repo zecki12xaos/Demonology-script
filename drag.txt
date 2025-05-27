@@ -1,0 +1,58 @@
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Find the frame
+local screenGui = PlayerGui:WaitForChild("GhostTrackerGui", 10)
+local frame = screenGui and screenGui:FindFirstChild("Frame")
+
+if not frame then
+    warn("Frame not found for drag functionality!")
+    return
+end
+
+-- Drag functionality
+local isDragging = false
+local dragStart = nil
+local startPos = nil
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        local newPos = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+
+        -- Get screen size
+        local screenSize = frame.Parent.AbsoluteSize
+        local frameSize = frame.AbsoluteSize
+
+        -- Clamp position
+        newPos = UDim2.new(
+            0,
+            math.clamp(newPos.X.Offset, 0, screenSize.X - frameSize.X),
+            0,
+            math.clamp(newPos.Y.Offset, 0, screenSize.Y - frameSize.Y)
+        )
+
+        frame.Position = newPos
+    end
+end)
