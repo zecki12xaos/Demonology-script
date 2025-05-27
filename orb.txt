@@ -1,0 +1,35 @@
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Color constants
+local COLOR_GREEN = Color3.fromRGB(0, 255, 0)
+local COLOR_RED = Color3.fromRGB(255, 0, 0)
+
+-- Find Orb label
+local screenGui = PlayerGui:WaitForChild("GhostTrackerGui", 10)
+local frame = screenGui and screenGui:FindFirstChild("Frame")
+local orbLabel = frame and frame:GetAttribute("OrbLabel")
+
+if not orbLabel then
+    warn("Orb label not found!")
+    return
+end
+
+-- Ghost Orb tracking
+coroutine.wrap(function()
+    local foundGhostOrb = false
+    while not foundGhostOrb do
+        local ghostOrb = Workspace:FindFirstChild("GhostOrb")
+        if ghostOrb and ghostOrb:IsA("BasePart") then
+            orbLabel.Text = "Ghost Orb: Yes"
+            orbLabel.TextColor3 = COLOR_GREEN
+            foundGhostOrb = true
+        else
+            orbLabel.Text = "Ghost Orb: No"
+            orbLabel.TextColor3 = COLOR_RED
+        end
+        task.wait(1)
+    end
+end)()
