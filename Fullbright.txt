@@ -1,0 +1,58 @@
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Color constants
+local COLOR_GRAY = Color3.fromRGB(200, 200, 200)
+
+-- Find the frame
+local screenGui = PlayerGui:WaitForChild("GhostTrackerGui", 10)
+local frame = screenGui and screenGui:FindFirstChild("Frame")
+
+if not frame then
+    warn("Frame not found for Fullbright button!")
+    return
+end
+
+-- Fullbright toggle button
+local fullbrightButton = Instance.new("TextButton")
+fullbrightButton.Size = UDim2.new(0.8, 0, 0, 30)
+fullbrightButton.Position = UDim2.new(0.1, 0, 0, 230)
+fullbrightButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+fullbrightButton.BorderSizePixel = 0
+fullbrightButton.Text = "Enable Fullbright"
+fullbrightButton.TextColor3 = COLOR_GRAY
+fullbrightButton.TextSize = 14
+fullbrightButton.Font = Enum.Font.Gotham
+fullbrightButton.Parent = frame
+
+-- Add rounded corners to button
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 5)
+buttonCorner.Parent = fullbrightButton
+
+-- Fullbright logic
+local isFullbright = false
+local defaultLighting = {
+    Brightness = Lighting.Brightness,
+    GlobalShadows = Lighting.GlobalShadows,
+    Ambient = Lighting.Ambient
+}
+
+local function toggleFullbright()
+    isFullbright = not isFullbright
+    if isFullbright then
+        Lighting.Brightness = 2
+        Lighting.GlobalShadows = false
+        Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+        fullbrightButton.Text = "Disable Fullbright"
+    else
+        Lighting.Brightness = defaultLighting.Brightness
+        Lighting.GlobalShadows = defaultLighting.GlobalShadows
+        Lighting.Ambient = defaultLighting.Ambient
+        fullbrightButton.Text = "Enable Fullbright"
+    end
+end
+
+fullbrightButton.MouseButton1Click:Connect(toggleFullbright)
