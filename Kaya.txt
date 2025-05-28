@@ -1,10 +1,32 @@
+-- Settings
+local correctKey = "7e54Wa2SiR4s7w9db3zyvDMJEYy"
+local savedDataFile = "kaya_key_valid.txt"
+local validTime = 86400 -- 24 часа в секундах
+
+-- Check time
+local function isKeyStillValid()
+	if isfile and readfile and isfile(savedDataFile) then
+		local savedTime = tonumber(readfile(savedDataFile))
+		if savedTime and os.time() < savedTime then
+			return true
+		end
+	end
+	return false
+end
+
+-- Autoload key
+if isKeyStillValid() then
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/zecki12xaos/Demonology-script/refs/heads/main/Demonology%20by%20Kaya.lua"))()
+	return
+end
+
+-- Ui
 local player = game.Players.LocalPlayer
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 screenGui.Name = "KeyUI"
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 
--- Главное окно
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.Size = UDim2.new(0, 0, 0, 0)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -13,27 +35,17 @@ mainFrame.BorderSizePixel = 0
 mainFrame.BackgroundTransparency = 1
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
-
--- Перемещаемость
 mainFrame.Active = true
 mainFrame.Draggable = true
 
--- Анимация появления
 task.delay(0.05, function()
-	mainFrame:TweenSize(
-		UDim2.new(0, 300, 0, 190),
-		Enum.EasingDirection.Out,
-		Enum.EasingStyle.Sine,
-		0.5,
-		true
-	)
+	mainFrame:TweenSize(UDim2.new(0, 300, 0, 190), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.5, true)
 	for i = 1, 10 do
 		mainFrame.BackgroundTransparency = 1 - i * 0.09
 		task.wait(0.03)
 	end
 end)
 
--- Переливающаяся обводка
 local uiStroke = Instance.new("UIStroke", mainFrame)
 uiStroke.Thickness = 2
 uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -46,7 +58,6 @@ task.spawn(function()
 	end
 end)
 
--- Glow снизу
 local glow = Instance.new("ImageLabel", mainFrame)
 glow.Size = UDim2.new(1, 60, 0, 20)
 glow.Position = UDim2.new(0, -30, 1, -10)
@@ -57,7 +68,6 @@ glow.ImageTransparency = 0.3
 glow.ScaleType = Enum.ScaleType.Slice
 glow.SliceCenter = Rect.new(20, 20, 80, 80)
 
--- Светлячки
 for i = 1, 20 do
 	local firefly = Instance.new("Frame", screenGui)
 	firefly.Size = UDim2.new(0, 6, 0, 6)
@@ -66,11 +76,9 @@ for i = 1, 20 do
 	firefly.BorderSizePixel = 0
 	firefly.Position = UDim2.new(math.random(), 0, math.random(), 0)
 	Instance.new("UICorner", firefly).CornerRadius = UDim.new(1, 0)
-
 	task.spawn(function()
 		while firefly and firefly.Parent do
-			local newX = math.random()
-			local newY = math.random()
+			local newX, newY = math.random(), math.random()
 			local time = math.random(2, 5)
 			firefly:TweenPosition(UDim2.new(newX, 0, newY, 0), "InOut", "Sine", time, true)
 			wait(time)
@@ -78,9 +86,7 @@ for i = 1, 20 do
 	end)
 end
 
--- Закрытие (анимация)
 local function closeUI()
-	-- Исчезновение дочерних элементов
 	for _, v in ipairs(mainFrame:GetDescendants()) do
 		if v:IsA("TextButton") or v:IsA("TextLabel") or v:IsA("TextBox") or v:IsA("ImageLabel") then
 			coroutine.wrap(function()
@@ -100,7 +106,6 @@ local function closeUI()
 		end
 	end
 
-	-- Удаление светлячков с анимацией
 	for _, v in ipairs(screenGui:GetChildren()) do
 		if v:IsA("Frame") and v.Size == UDim2.new(0, 6, 0, 6) then
 			coroutine.wrap(function()
@@ -113,26 +118,17 @@ local function closeUI()
 		end
 	end
 
-	-- Сама рамка исчезает и сворачивается
 	wait(0.4)
-	mainFrame:TweenSize(
-		UDim2.new(0, 0, 0, 0),
-		Enum.EasingDirection.In,
-		Enum.EasingStyle.Sine,
-		0.5,
-		true
-	)
+	mainFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.5, true)
 	for i = 0, 1, 0.1 do
 		mainFrame.BackgroundTransparency = i
 		uiStroke.Transparency = i
 		wait(0.03)
 	end
-
 	wait(0.2)
 	screenGui:Destroy()
 end
 
--- Кнопка закрытия
 local closeButton = Instance.new("TextButton", mainFrame)
 closeButton.Size = UDim2.new(0, 30, 0, 30)
 closeButton.Position = UDim2.new(1, -35, 0, 5)
@@ -143,7 +139,6 @@ closeButton.Font = Enum.Font.GothamBold
 closeButton.TextSize = 20
 closeButton.MouseButton1Click:Connect(closeUI)
 
--- Заголовок
 local label = Instance.new("TextLabel", mainFrame)
 label.Size = UDim2.new(1, -20, 0, 30)
 label.Position = UDim2.new(0, 10, 0, 10)
@@ -154,7 +149,6 @@ label.Font = Enum.Font.GothamBold
 label.TextSize = 22
 label.TextXAlignment = Enum.TextXAlignment.Center
 
--- Ввод ключа
 local keyBox = Instance.new("TextBox", mainFrame)
 keyBox.Size = UDim2.new(1, -40, 0, 35)
 keyBox.Position = UDim2.new(0, 20, 0, 50)
@@ -167,7 +161,6 @@ keyBox.Font = Enum.Font.Gotham
 keyBox.TextSize = 18
 Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 6)
 
--- Submit
 local submitButton = Instance.new("TextButton", mainFrame)
 submitButton.Size = UDim2.new(1, -60, 0, 35)
 submitButton.Position = UDim2.new(0, 30, 0, 100)
@@ -179,7 +172,6 @@ submitButton.TextSize = 18
 submitButton.BorderSizePixel = 0
 Instance.new("UICorner", submitButton).CornerRadius = UDim.new(0, 6)
 
--- Кнопка Discord
 local discordButton = Instance.new("TextButton", mainFrame)
 discordButton.Size = UDim2.new(1, -60, 0, 30)
 discordButton.Position = UDim2.new(0, 30, 0, 145)
@@ -191,7 +183,6 @@ discordButton.TextSize = 16
 discordButton.BorderSizePixel = 0
 Instance.new("UICorner", discordButton).CornerRadius = UDim.new(0, 6)
 
--- Декаль внизу
 local decalImage = Instance.new("ImageLabel", mainFrame)
 decalImage.Size = UDim2.new(0, 200, 0, 40)
 decalImage.Position = UDim2.new(0.5, -100, 1, -40)
@@ -199,10 +190,13 @@ decalImage.BackgroundTransparency = 1
 decalImage.Image = "rbxassetid://71035399575222"
 decalImage.ScaleType = Enum.ScaleType.Fit
 
--- Проверка ключа
-local correctKey = "7e54Wa2SiR4s7w9db3zyvDMJEYy"
+-- Key
 submitButton.MouseButton1Click:Connect(function()
 	if keyBox.Text == correctKey then
+		-- Сохраняем время действия
+		if writefile then
+			writefile(savedDataFile, tostring(os.time() + validTime))
+		end
 		closeUI()
 		wait(0.8)
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/zecki12xaos/Demonology-script/refs/heads/main/Demonology%20by%20Kaya.lua"))()
@@ -212,9 +206,8 @@ submitButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Копирование Discord
 discordButton.MouseButton1Click:Connect(function()
 	if setclipboard then
-		setclipboard("https://discord.gg/Ydv9RqpXAq") -- замените на свою ссылку
+		setclipboard("https://discord.gg/Ydv9RqpXAq")
 	end
 end)
