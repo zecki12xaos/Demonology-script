@@ -30,6 +30,31 @@ frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 frame.BorderSizePixel = 0 -- отключаем стандартную рамку
 frame.Parent = screenGui
 
+-- Кнопка закрытия (крестик)
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 40, 0, 15)
+closeButton.Position = UDim2.new(1, -45, 0, 5) -- Немного отступим от края
+closeButton.BackgroundColor3 = Color3.fromRGB(60, 43, 71)
+closeButton.BackgroundTransparency = 0
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.TextSize = 25
+closeButton.Font = Enum.Font.GothamBold
+closeButton.BorderSizePixel = 0
+closeButton.ZIndex = 10
+closeButton.Parent = frame
+
+-- Скругление для кнопки
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 10)
+closeCorner.Parent = closeButton
+
+-- Обработчик нажатия
+closeButton.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+
 -- Добавляем фоновое изображение
 local backgroundImage = Instance.new("ImageLabel")
 backgroundImage.Image = "http://www.roblox.com/asset/?id=74753068383460"
